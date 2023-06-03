@@ -1,0 +1,307 @@
+{% extends 'template.html' %}
+{% block content %}
+
+    <!--New flip modal-->
+    <div class="modal fade bd-example-modal-lg" id="newflipmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-bs-theme="dark">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title">Deposit Skins</h5>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="hideNewModal()">
+            </button>
+          </div>
+          <div class="modal-body m-0 p-0 overflow-y-scroll"style="height:40vh !important">
+            <div class="row w-100 m-0 p-1" id="newflip-row"></div>
+          </div>
+          <div class="modal-footer">
+            <form id="newflip" class="m-0 p-0" action="/newflip" method="POST">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input flipred" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="red" checked>
+                <label class="form-check-label" for="inlineRadio1">Red</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input flipblack" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="black">
+                <label class="form-check-label" for="inlineRadio2">Black</label>
+              </div>
+              <button type="submit" class="btn btn-success">Create Flip</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Join flip modal-->
+    <div class="modal fade bd-example-modal-lg" id="joinflipmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-bs-theme="dark">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title">Deposit Skins</h5>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="hideJoinModal()">
+            </button>
+          </div>
+          <div class="modal-body" style="height:40vh !important">
+          </div>
+          <div class="modal-footer">
+            <form id="joinflip" class="m-0 p-0" action="/joinflip" method="POST"><input id="flip-form-id" type="hidden" name="id"/><button type="submit" class="btn btn-primary">Join Flip</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--View flip modal-->
+    <div class="modal fade bd-example-modal-lg" id="viewflipmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-bs-theme="dark">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title" id="view-title">Flip ID</h5>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="hideViewModal()">
+            </button>
+          </div>
+          <div class="modal-body p-0" style="height:40vh !important">
+            <div class="row m-0 p-0 h-100 w-100 justify-content-center">
+              <div class="col-6 p-3 m-0" style="text-align: center;">PLAYER 1</div>
+              <div class="col-6 p-3 m-0" style="text-align: center;">PLAYER 2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Welcome modal-->
+    <div class="modal fade bd-example-modal-lg" id="welcomemodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" data-bs-theme="dark">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title" id="view-title">Welcome!</h5>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="hideViewModal()">
+            </button>
+          </div>
+          <div class="modal-body p-0" style="height:40vh !important">
+            <div class="row m-0 p-0 h-100 w-100 justify-content-center">
+              <div class="col-6 p-3 m-0 mt-5">This site is currently in development.<br>Here's what you can do so far:<br><br>- Login with steam<br>- Create a flip, choosing red or black<br>- Join someone else's flip<br><br>Note that the site doesn't involve real skins yet. That's coming in v1.0!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row w-100 p-0 m-0 mb-5 h-auto justify-content-around">
+
+      <div class="col-lg-9 col-md-11 col-sm-11 m-0 p-0 pt-5 align-self-center" id="flip-container">
+      {% if current_user.is_authenticated %}
+      <button type="submit" class="btn btn-success mt-2 mb-3" onclick="showNewModal()">Create Flip</button>
+      {% endif %}
+      </div> 
+
+      <!--<div class="col-lg-2 col-md-0 d-lg-block d-sm-none"></div>-->
+
+    </div>
+
+    <script src="{{ url_for('static', filename='/scripts/loadFlip.js') }}"></script>
+
+    <script type="text/javascript">
+
+    function createFlip(id, animate){
+      card = document.createElement("div");
+      card.className = "card p-0 m-0 mt-1 mb-3 w-100 flipcard"
+      if(animate == true){card.classList.add("animate__animated", "animate__fadeInUp");}
+      card.id = 'flip-'+id;
+      card.dataset.bsTheme = "dark";
+      document.getElementById('flip-container').appendChild(card);
+    }
+
+    function showNewModal(){
+      document.getElementById("newflip-row").innerHTML = "";
+      getInventory("newflip-row");
+      $("#newflipmodal").modal('show');
+    }
+    function hideNewModal(){
+      $("#newflipmodal").modal('hide');
+    }
+    function showJoinModal(id){
+      $("#flip-form-id").val(id);
+      $("#joinflipmodal").modal('show');
+    }
+    function hideJoinModal(){
+      $("#joinflipmodal").modal('hide');
+    }
+    function showViewModal(id){
+      $("#view-title").html("Flip " + id);
+      $("#viewflipmodal").modal('show');
+    }
+    function hideViewModal(){
+      $("#viewflipmodal").modal('hide');
+    }
+
+    $(document).on("click", "#joinbutton", function() {
+        var data = $(this).attr('data');
+        showJoinModal(data);
+    });
+    $(document).on("click", "#viewbutton", function() {
+        var data = $(this).attr('data');
+        showViewModal(data);
+    });
+
+    function newFlipToastr(){
+      toastr.options.positionClass = 'toast-bottom-left';
+      toastr.options = {
+        "closeButton": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-bottom-left",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut",
+        "showDuration": "200",
+        "hideDuration": "200",
+      }
+
+      toastr.success('Successfully created a new flip!');
+    }
+
+    function joinFlipToastr(){
+      toastr.options.positionClass = 'toast-bottom-left';
+      toastr.options = {
+        "closeButton": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-bottom-left",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut",
+        "showDuration": "200",
+        "hideDuration": "200",
+      }
+
+      toastr.success('Successfully joined a flip!');
+    }
+
+    function loadInventory(id){
+
+      modalbody = document.getElementById(id);
+      
+      '{% if current_user.is_authenticated %}'
+      inventory = JSON.parse('{{ current_user.inventory | tojson | safe}}');
+      '{% endif %}'
+
+      console.log(inventory);
+
+      if(inventory.length == 0){
+        error = document.createElement("p");
+        error.innerHTML = "Failed to load inventory.";
+        modalbody.appendChild(error);
+      } 
+      else{
+
+        for (var i = 0; i < inventory.length; i++){
+
+          check = document.createElement("div");
+          check.className = "custom-control custom-checkbox image-checkbox border border-light-subtle p-1";
+
+          item = document.createElement("div");
+          item.className = "col-2 m-0 p-1";
+
+          input = document.createElement("input");
+          input.type = "checkbox";
+          input.className = "custom-control-input";
+          input.name = "selectedskins";
+          input.id = inventory[i]['asset_id']
+          input.value = inventory[i]['asset_id'];
+          input.setAttribute("Form",'newflip');
+
+          label = document.createElement("label");
+          label.className = "custom-control-label";
+          label.htmlFor = input.id;
+
+          item_img = document.createElement("img");
+          item_img.src = "https://community.cloudflare.steamstatic.com/economy/image/" + inventory[i]['image_url'];
+          item_img.className = "w-100 h-auto m-0 p-0 ";
+
+          price = document.createElement("p");
+          price.innerHTML = '$' + inventory[i]['price'];
+          
+          label.appendChild(item_img);
+          check.append(input);
+          check.append(label);
+          
+          item.append(check);
+          check.append(price);
+          
+          modalbody.appendChild(item);
+          }
+        }
+    }
+
+    function getInventory(id){
+      let ajax = $.ajax({
+          type:'POST',
+          url:'/getinventory',
+          success:function(){}
+      })
+
+      ajax.done(function(){
+        loadInventory(id);
+      });
+    }
+
+    $(document).ready(function(){
+
+      // Flips, ajax posts, sockets
+
+      '{% for flip in flips %}'
+      createFlip( '{{ flip.id }}', false);
+      
+      loadFlip('{{ current_user.is_authenticated }}', '{{ current_user.personaname }}', '{{ flip.id }}', '{{ flip.creator.personaname }}','{{ flip.creator.avatarLink }}', '{{ flip.creatorSkins | tojson | safe }}', '{{ flip.creatorChoseRed }}', '{{ flip.joiner.personaname }}', '{{ flip.joiner.avatarLink }}', '{{ flip.creatorSkins | tojson | safe }}');
+      
+      '{% endfor %}'
+
+      '{% if not current_user.is_authenticated %}'
+      $("#welcomemodal").modal('show');
+      '{% endif %}'
+
+      $.ajaxSetup({
+        async: true
+      });
+
+      $("#newflip").submit(function(e) {
+        $("#newflipmodal").modal('hide');
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+          type:'POST',
+          url:'/newflip',
+          data: form.serialize(),
+          success:function(){newFlipToastr();}
+        })
+      });
+
+      $("#joinflip").submit(function(e) {
+        $("#joinflipmodal").modal('hide');
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+          type:'POST',
+          url:'/joinflip',
+          data: form.serialize(),
+          success:function(){joinFlipToastr();}
+        })
+      });
+
+      $(function() {
+        var socket = io();
+        socket.on('new_flip', function(flip) {
+          createFlip(flip.id, true);
+          loadFlip(flip.id, flip.creatorPersonaname, flip.creatorAvatar, JSON.stringify(flip.creatorSkins), flip.creatorChoseRed);
+        });
+        socket.on('updateflip', function(flip) {
+          //loadFlipOld(flip.id, flip.creatorId, flip.creatorPersonaname, flip.creatorAvatar, flip.creatorStatus, flip.creatorChoseRed, flip.creatorSkins, flip.joinerId, flip.joinerPersonaname, flip.joinerAvatar, flip.joinerStatus);
+        });
+      });
+    });
+
+    </script>
+
+{% endblock %}
